@@ -2,6 +2,7 @@ using KnowledgeSpace.BackendServer.Data;
 using KnowledgeSpace.BackendServer.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,8 +50,17 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 builder.Services.AddTransient<DbInitializer>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddMvcCore().AddApiExplorer();
+if (environment == Environments.Development || environment == "UAT" || environment == "uat")
+{
+    builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+}
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Knowledge Space API", Version = "v1" });
 
+});
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 
@@ -59,7 +69,11 @@ if (!app.Environment.IsDevelopment() || app.Environment.EnvironmentName.ToLower(
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Knowledge Space API V1");
+});
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -70,6 +84,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
 
 using (var scope = app.Services.CreateAsyncScope())
 {
