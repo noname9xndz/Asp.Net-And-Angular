@@ -30,7 +30,8 @@ namespace KnowledgeSpace.BackendServer.IdentityServer
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
-                new ApiScope("api.knowledgespace", "KnowledgeSpace API")
+                new ApiScope("api.knowledgespace", "KnowledgeSpace API"),
+                new ApiScope("api.swagger", "KnowledgeSpace Swagger"),
             };
 
         //client
@@ -77,7 +78,8 @@ namespace KnowledgeSpace.BackendServer.IdentityServer
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
-                        "api.knowledgespace"
+                        "api.knowledgespace",
+                        "api.swagger"
                     }
                 },
                 new Client

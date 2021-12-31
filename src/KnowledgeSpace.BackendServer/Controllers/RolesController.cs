@@ -5,6 +5,7 @@ using KnowledgeSpace.ViewModels;
 using KnowledgeSpace.ViewModels.Other;
 using KnowledgeSpace.ViewModels.Requests;
 using KnowledgeSpace.ViewModels.Systems;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace KnowledgeSpace.BackendServer.Controllers
 {
+    [Authorize("Bearer")]
     public class RolesController : BaseController
     {
         private readonly RoleManager<IdentityRole> _roleManager;

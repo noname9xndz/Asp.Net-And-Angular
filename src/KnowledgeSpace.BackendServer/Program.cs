@@ -28,9 +28,10 @@ builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory());
 builder.WebHost.UseIISIntegration();
 
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 
 //https://deblokt.com/2019/09/23/04-part-1-identityserver4-asp-net-core-identity/
 // small app => save IdentityResources ,api ,client use InMemory
@@ -43,8 +44,8 @@ builder.Services.AddIdentityServer(options =>
     options.Events.RaiseSuccessEvents = true;
 }).AddInMemoryApiResources(Config.Apis)
   .AddInMemoryApiScopes(Config.ApiScopes)
-  .AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
-  //.AddInMemoryClients(Config.Clients)
+  //.AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
+  .AddInMemoryClients(Config.Clients)
   .AddInMemoryIdentityResources(Config.Ids)
   .AddAspNetIdentity<User>()
   .AddProfileService<IdentityProfileService>()
@@ -64,17 +65,33 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.User.RequireUniqueEmail = true;
 });
+
+builder.Services.AddAuthentication()
+               .AddLocalApi("Bearer", option =>
+               {
+                   option.ExpectedScope = "api.knowledgespace";
+               });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Bearer", policy =>
+    {
+        policy.AddAuthenticationSchemes("Bearer");
+        policy.RequireAuthenticatedUser();
+    });
+});
+
 builder.Services.AddRazorPages(options =>
 {
-    //options.Conventions.AddAreaFolderRouteModelConvention("Identity", "/Account/", model =>
-    //{
-    //    foreach (var selector in model.Selectors)
-    //    {
-    //        var attributeRouteModel = selector.AttributeRouteModel;
-    //        attributeRouteModel.Order = -1;
-    //        attributeRouteModel.Template = attributeRouteModel.Template.Remove(0, "Identity".Length);
-    //    }
-    //});
+    options.Conventions.AddAreaFolderRouteModelConvention("Identity", "/Account/", model =>
+    {
+        foreach (var selector in model.Selectors)
+        {
+            var attributeRouteModel = selector.AttributeRouteModel;
+            attributeRouteModel.Order = -1;
+            attributeRouteModel.Template = attributeRouteModel.Template.Remove(0, "Identity".Length);
+        }
+    });
 });
 
 builder.Services.AddMvcCore()
@@ -99,32 +116,49 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Knowledge Space API", Version = "v1" });
 
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.OAuth2,
+        Flows = new OpenApiOAuthFlows
+        {
+            Implicit = new OpenApiOAuthFlow
+            {
+               // AuthorizationUrl = new Uri(builder.Configuration["AuthorityUrl"] + "/connect/authorize"),
+                AuthorizationUrl = new Uri("https://localhost:7062/connect/authorize"),
+                Scopes = new Dictionary<string, string> { 
+                    {"api.knowledgespace", "KnowledgeSpace API" },
+                    {"api.swagger","KnowledgeSpace Swagger" }
+                }
+            },
+        },
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        new List<string>{ "api.knowledgespace", "api.swagger" }
+                    }
+                });
+
 });
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment() || app.Environment.EnvironmentName.ToLower() == "uat")
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName.ToLower() == "uat")
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
 }
 app.UseStaticFiles();
 app.UseIdentityServer();
 app.UseAuthentication();
 app.UseHttpsRedirection();
-
 app.UseSwagger();
-
-app.UseHttpsRedirection();
-
 app.UseRouting();
 app.UseAuthorization();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapDefaultControllerRoute();
@@ -135,25 +169,25 @@ app.UseSwagger();
 
 app.UseSwaggerUI(c =>
 {
-    //c.OAuthClientId("swagger");
+    c.OAuthClientId("swagger");
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Knowledge Space API V1");
 });
 
 
-//using (var scope = app.Services.CreateAsyncScope())
-//{
-//    var services = scope.ServiceProvider;
-//    try
-//    {
-//        Log.Information("Seeding data...");
-//        var dbInitializer = services.GetService<DbInitializer>();
-//        await dbInitializer.Seed();
-//    }
-//    catch (Exception ex)
-//    {
-//        var logger = services.GetRequiredService<ILogger<Program>>();
-//        logger.LogError(ex, "An error occurred while seeding the database.");
-//    }
-//}
+using (var scope = app.Services.CreateAsyncScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        Log.Information("Seeding data...");
+        var dbInitializer = services.GetService<DbInitializer>();
+        await dbInitializer.Seed();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 app.Run();
