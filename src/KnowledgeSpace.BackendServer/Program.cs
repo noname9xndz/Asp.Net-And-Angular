@@ -1,6 +1,12 @@
+using FluentValidation.AspNetCore;
 using KnowledgeSpace.BackendServer.Data;
 using KnowledgeSpace.BackendServer.Data.Entities;
+using KnowledgeSpace.BackendServer.IdentityServer;
+using KnowledgeSpace.BackendServer.Services;
+using KnowledgeSpace.ViewModels.Other;
+using KnowledgeSpace.ViewModels.Validator;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -21,19 +27,29 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory());
 builder.WebHost.UseIISIntegration();
 
-// Add services to the container.
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(connectionString));
-//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-//    .AddEntityFrameworkStores<ApplicationDbContext>();
-
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+//https://deblokt.com/2019/09/23/04-part-1-identityserver4-asp-net-core-identity/
+// small app => save IdentityResources ,api ,client use InMemory
+// large app => save to database
+builder.Services.AddIdentityServer(options =>
+{
+    options.Events.RaiseErrorEvents = true;
+    options.Events.RaiseInformationEvents = true;
+    options.Events.RaiseFailureEvents = true;
+    options.Events.RaiseSuccessEvents = true;
+}).AddInMemoryApiResources(Config.Apis)
+  .AddInMemoryApiScopes(Config.ApiScopes)
+  .AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
+  //.AddInMemoryClients(Config.Clients)
+  .AddInMemoryIdentityResources(Config.Ids)
+  .AddAspNetIdentity<User>()
+  .AddProfileService<IdentityProfileService>()
+  .AddDeveloperSigningCredential();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Default Lockout settings.
@@ -48,9 +64,33 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.User.RequireUniqueEmail = true;
 });
-builder.Services.AddTransient<DbInitializer>();
+builder.Services.AddRazorPages(options =>
+{
+    //options.Conventions.AddAreaFolderRouteModelConvention("Identity", "/Account/", model =>
+    //{
+    //    foreach (var selector in model.Selectors)
+    //    {
+    //        var attributeRouteModel = selector.AttributeRouteModel;
+    //        attributeRouteModel.Order = -1;
+    //        attributeRouteModel.Template = attributeRouteModel.Template.Remove(0, "Identity".Length);
+    //    }
+    //});
+});
 
-builder.Services.AddMvcCore().AddApiExplorer();
+builder.Services.AddMvcCore()
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<RoleCreateRequestValidator>())
+    .AddApiExplorer();
+
+builder.Services.AddTransient<DbInitializer>();
+builder.Services.AddTransient<IEmailSender, EmailSenderService>();
+builder.Services.AddTransient<ISequenceService, SequenceService>();
+
+builder.Services.AddTransient<IStorageService, FileStorageService>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IViewRenderService, ViewRenderService>();
+builder.Services.AddTransient<ICacheService, DistributedCacheService>();
+builder.Services.AddTransient<IOneSignalService, OneSignalService>();
+
 if (environment == Environments.Development || environment == "UAT" || environment == "uat")
 {
     builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
@@ -69,38 +109,51 @@ if (!app.Environment.IsDevelopment() || app.Environment.EnvironmentName.ToLower(
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Knowledge Space API V1");
-});
-app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseIdentityServer();
+app.UseAuthentication();
+app.UseHttpsRedirection();
+
+app.UseSwagger();
+
+app.UseHttpsRedirection();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-
-
-using (var scope = app.Services.CreateAsyncScope())
+app.UseEndpoints(endpoints =>
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        Log.Information("Seeding data...");
-        var dbInitializer = services.GetRequiredService<DbInitializer>();
-        await dbInitializer.Seed();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
+    endpoints.MapDefaultControllerRoute();
+    endpoints.MapRazorPages();
+});
+
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
+{
+    //c.OAuthClientId("swagger");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Knowledge Space API V1");
+});
+
+
+//using (var scope = app.Services.CreateAsyncScope())
+//{
+//    var services = scope.ServiceProvider;
+//    try
+//    {
+//        Log.Information("Seeding data...");
+//        var dbInitializer = services.GetService<DbInitializer>();
+//        await dbInitializer.Seed();
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "An error occurred while seeding the database.");
+//    }
+//}
 
 app.Run();
