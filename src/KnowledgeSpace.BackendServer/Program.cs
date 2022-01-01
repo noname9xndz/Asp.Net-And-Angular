@@ -1,6 +1,7 @@
 using FluentValidation.AspNetCore;
 using KnowledgeSpace.BackendServer.Data;
 using KnowledgeSpace.BackendServer.Data.Entities;
+using KnowledgeSpace.BackendServer.Extensions;
 using KnowledgeSpace.BackendServer.IdentityServer;
 using KnowledgeSpace.BackendServer.Services;
 using KnowledgeSpace.ViewModels.Other;
@@ -19,10 +20,10 @@ builder.Configuration
     .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 builder.Host.UseSerilog((ctx, lc) => lc
-    .MinimumLevel.Information()
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day, shared: true)
+    //.MinimumLevel.Information()
+    //.Enrich.FromLogContext()
+    //.WriteTo.Console()
+    //.WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day, shared: true)
     .ReadFrom.Configuration(builder.Configuration));
 builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory());
 builder.WebHost.UseIISIntegration();
@@ -151,6 +152,7 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName.ToLower()
 {
     app.UseDeveloperExceptionPage();
 }
+app.UseErrorWrapping();
 app.UseStaticFiles();
 app.UseIdentityServer();
 app.UseAuthentication();

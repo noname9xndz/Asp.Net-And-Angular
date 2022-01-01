@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace KnowledgeSpace.BackendServer.Helpers
 {
+    /// <summary>
+    /// check ModelState
+    /// </summary>
     public class ApiValidationFilterAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)

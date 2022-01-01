@@ -41,4 +41,8 @@
 	  <ProjectReference Include="..\KnowledgeSpace.ViewModels\KnowledgeSpace.ViewModels.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="logs\" />
+	</ItemGroup>
+
 </Project>
