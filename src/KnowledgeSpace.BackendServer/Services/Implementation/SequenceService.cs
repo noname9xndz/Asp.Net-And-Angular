@@ -19,7 +19,7 @@ namespace KnowledgeSpace.BackendServer.Services
         }
 
         /// <summary>
-        /// get next id type auto id (int) when use DatabaseGeneratedOption.Identity 
+        /// get next id type auto id (int) in database
         /// </summary>
         /// <returns></returns>
         public async Task<int> GetKnowledgeBaseNewId()
