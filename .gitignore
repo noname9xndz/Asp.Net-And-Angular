@@ -349,3 +349,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 src/KnowledgeSpace.BackendServer/appsettings.UAT.json
+src/admin-app/.angular/*
