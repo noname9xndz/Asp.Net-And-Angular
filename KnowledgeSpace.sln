@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5A4404AD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnowledgeSpace.BackendServer.UnitTest", "tests\KnowledgeSpace.BackendServer.UnitTest\KnowledgeSpace.BackendServer.UnitTest.csproj", "{70E8A39D-5DA6-4A3D-AC5C-A44EE0600E9A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnowledgeSpace.ViewModels.UnitTest", "tests\KnowledgeSpace.ViewModels.UnitTest\KnowledgeSpace.ViewModels.UnitTest.csproj", "{2E21BA63-1C69-4D97-B47F-2D8E5909AA07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{70E8A39D-5DA6-4A3D-AC5C-A44EE0600E9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70E8A39D-5DA6-4A3D-AC5C-A44EE0600E9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70E8A39D-5DA6-4A3D-AC5C-A44EE0600E9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E21BA63-1C69-4D97-B47F-2D8E5909AA07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E21BA63-1C69-4D97-B47F-2D8E5909AA07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E21BA63-1C69-4D97-B47F-2D8E5909AA07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E21BA63-1C69-4D97-B47F-2D8E5909AA07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{629CE8EF-9C02-4036-A2B6-866BE9EEBB8D} = {9A62110B-B671-4893-B31D-D2D6036A4A03}
 		{075A0708-2578-492A-B8D0-E5107FA5863D} = {9A62110B-B671-4893-B31D-D2D6036A4A03}
 		{70E8A39D-5DA6-4A3D-AC5C-A44EE0600E9A} = {5A4404AD-EAFE-4A05-8C75-42FB5357F11D}
+		{2E21BA63-1C69-4D97-B47F-2D8E5909AA07} = {5A4404AD-EAFE-4A05-8C75-42FB5357F11D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {32D52735-AB6D-48C5-822E-2BBF903B2060}
