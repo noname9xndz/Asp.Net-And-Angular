@@ -1,4 +1,7 @@
-﻿
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using KnowledgeSpace.BackendServer.Authorization;
 using KnowledgeSpace.BackendServer.Constants;
 using KnowledgeSpace.BackendServer.Data.Entities;
 using KnowledgeSpace.BackendServer.Extensions;
@@ -19,6 +22,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         #region Comments
 
         [HttpGet("{knowledgeBaseId}/comments/filter")]
+        [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.VIEW)]
         public async Task<IActionResult> GetCommentsPaging(int? knowledgeBaseId, string filter, int pageIndex, int pageSize)
         {
             var query = from c in _context.Comments
@@ -58,6 +62,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet("{knowledgeBaseId}/comments/{commentId}")]
+        [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.VIEW)]
         public async Task<IActionResult> GetCommentDetail(int commentId)
         {
             var comment = await _context.Comments.FindAsync(commentId);
@@ -132,6 +137,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPut("{knowledgeBaseId}/comments/{commentId}")]
+        [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.UPDATE)]
         [ApiValidationFilter]
         public async Task<IActionResult> PutComment(int commentId, [FromBody]CommentCreateRequest request)
         {
@@ -154,6 +160,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpDelete("{knowledgeBaseId}/comments/{commentId}")]
+        [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.DELETE)]
         public async Task<IActionResult> DeleteComment(int knowledgeBaseId, int commentId)
         {
             var comment = await _context.Comments.FindAsync(commentId);

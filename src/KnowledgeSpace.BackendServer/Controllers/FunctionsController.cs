@@ -1,4 +1,6 @@
-﻿using KnowledgeSpace.BackendServer.Data;
+﻿using KnowledgeSpace.BackendServer.Authorization;
+using KnowledgeSpace.BackendServer.Constants;
+using KnowledgeSpace.BackendServer.Data;
 using KnowledgeSpace.BackendServer.Data.Entities;
 using KnowledgeSpace.BackendServer.Helpers;
 using KnowledgeSpace.ViewModels;
@@ -26,6 +28,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPost]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.CREATE)]
         [ApiValidationFilter]
         public async Task<IActionResult> PostFunction([FromBody] FunctionCreateRequest request)
         {
@@ -44,7 +47,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
                 Url = request.Url,
                 Icon = request.Icon
             };
-            await _context.Functions.AddAsync(function);
+            _context.Functions.Add(function);
             var result = await _context.SaveChangesAsync();
 
             if (result > 0)
@@ -62,6 +65,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
         public async Task<IActionResult> GetFunctions()
         {
             var functions = _context.Functions;
@@ -80,6 +84,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet("{functionId}/parents")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
         public async Task<IActionResult> GetFunctionsByParentId(string functionId)
         {
             var functions = _context.Functions.Where(x => x.ParentId == functionId);
@@ -98,6 +103,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet("filter")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
         public async Task<IActionResult> GetFunctionsPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _context.Functions.AsQueryable();
@@ -130,6 +136,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet("{id}")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
         public async Task<IActionResult> GetById(string id)
         {
             var function = await _context.Functions.FindAsync(id);
@@ -149,6 +156,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPut("{id}")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.UPDATE)]
         [ApiValidationFilter]
         public async Task<IActionResult> PutFunction(string id, [FromBody]FunctionCreateRequest request)
         {
@@ -173,6 +181,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpDelete("{id}")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.DELETE)]
         public async Task<IActionResult> DeleteFunction(string id)
         {
             var function = await _context.Functions.FindAsync(id);
@@ -202,6 +211,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet("{functionId}/commands")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
         public async Task<IActionResult> GetCommandsInFunction(string functionId)
         {
             var query = from a in _context.Commands
@@ -228,6 +238,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPost("{functionId}/commands")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.CREATE)]
         [ApiValidationFilter]
         public async Task<IActionResult> PostCommandToFunction(string functionId, [FromBody] CommandAssignRequest request)
         {
@@ -276,6 +287,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpDelete("{functionId}/commands")]
+        [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.UPDATE)]
         public async Task<IActionResult> DeleteCommandToFunction(string functionId, [FromQuery] CommandAssignRequest request)
         {
             foreach (var commandId in request.CommandIds)

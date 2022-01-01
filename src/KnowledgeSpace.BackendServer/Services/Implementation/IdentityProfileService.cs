@@ -15,6 +15,10 @@ using System.Threading.Tasks;
 
 namespace KnowledgeSpace.BackendServer.Services
 {
+
+    /// <summary>
+    /// add more data for client
+    /// </summary>
     public class IdentityProfileService : IProfileService
     {
         private readonly IUserClaimsPrincipalFactory<User> _claimsFactory;
@@ -41,7 +45,7 @@ namespace KnowledgeSpace.BackendServer.Services
             {
                 throw new ArgumentException("");
             }
-
+            //get claims
             var principal = await _claimsFactory.CreateAsync(user);
             var claims = principal.Claims.ToList();
             var roles = await _userManager.GetRolesAsync(user);

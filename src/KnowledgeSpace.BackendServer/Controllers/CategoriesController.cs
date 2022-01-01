@@ -1,4 +1,5 @@
-﻿using KnowledgeSpace.BackendServer.Constants;
+﻿using KnowledgeSpace.BackendServer.Authorization;
+using KnowledgeSpace.BackendServer.Constants;
 using KnowledgeSpace.BackendServer.Data;
 using KnowledgeSpace.BackendServer.Data.Entities;
 using KnowledgeSpace.BackendServer.Helpers;
@@ -29,6 +30,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPost]
+        [ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.CREATE)]
         [ApiValidationFilter]
         public async Task<IActionResult> PostCategory([FromBody] CategoryCreateRequest request)
         {
@@ -73,6 +75,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet("filter")]
+        [ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.VIEW)]
         public async Task<IActionResult> GetCategoriesPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _context.Categories.AsQueryable();
@@ -109,6 +112,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPut("{id}")]
+        [ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.UPDATE)]
         [ApiValidationFilter]
         public async Task<IActionResult> PutCategory(int id, [FromBody]CategoryCreateRequest request)
         {
@@ -140,6 +144,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpDelete("{id}")]
+        [ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.DELETE)]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);

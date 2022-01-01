@@ -1,4 +1,5 @@
-﻿using KnowledgeSpace.BackendServer.Constants;
+﻿using KnowledgeSpace.BackendServer.Authorization;
+using KnowledgeSpace.BackendServer.Constants;
 using KnowledgeSpace.BackendServer.Data;
 using KnowledgeSpace.BackendServer.Data.Entities;
 using KnowledgeSpace.BackendServer.Extensions;
@@ -54,6 +55,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPost]
+        [ClaimRequirement(FunctionCode.CONTENT_KNOWLEDGEBASE, CommandCode.CREATE)]
         [ApiValidationFilter]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PostKnowledgeBase([FromForm] KnowledgeBaseCreateRequest request)
@@ -110,6 +112,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpGet]
+        [ClaimRequirement(FunctionCode.CONTENT_KNOWLEDGEBASE, CommandCode.VIEW)]
         public async Task<IActionResult> GetKnowledgeBases()
         {
             var knowledgeBases = _context.KnowledgeBases;
@@ -297,6 +300,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpPut("{id}")]
+        [ClaimRequirement(FunctionCode.CONTENT_KNOWLEDGEBASE, CommandCode.UPDATE)]
         [ApiValidationFilter]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PutKnowledgeBase(int id, [FromForm]KnowledgeBaseCreateRequest request)
@@ -333,6 +337,7 @@ namespace KnowledgeSpace.BackendServer.Controllers
         }
 
         [HttpDelete("{id}")]
+        [ClaimRequirement(FunctionCode.CONTENT_KNOWLEDGEBASE, CommandCode.DELETE)]
         public async Task<IActionResult> DeleteKnowledgeBase(int id)
         {
             var knowledgeBase = await _context.KnowledgeBases.FindAsync(id);
