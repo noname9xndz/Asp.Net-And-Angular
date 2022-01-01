@@ -18,6 +18,10 @@ namespace KnowledgeSpace.BackendServer.Services
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// get next id type auto id (int) when use DatabaseGeneratedOption.Identity 
+        /// </summary>
+        /// <returns></returns>
         public async Task<int> GetKnowledgeBaseNewId()
         {
             using (SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))

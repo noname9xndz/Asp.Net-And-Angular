@@ -79,7 +79,7 @@ namespace KnowledgeSpace.BackendServer.Data
             builder.Entity<Function>().Property(x=> x.ParentId).IsRequired(false);
             builder.Entity<Function>().Property(x => x.Icon).IsRequired(false);
 
-            //check next id type auto id (int) when use DatabaseGeneratedOption.Identity 
+            //check next id type auto id (int) in database
             builder.HasSequence("KnowledgeBaseSequence");
         }
     }

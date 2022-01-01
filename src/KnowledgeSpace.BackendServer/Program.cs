@@ -101,7 +101,6 @@ builder.Services.AddMvcCore()
 builder.Services.AddTransient<DbInitializer>();
 builder.Services.AddTransient<IEmailSender, EmailSenderService>();
 builder.Services.AddTransient<ISequenceService, SequenceService>();
-
 builder.Services.AddTransient<IStorageService, FileStorageService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IViewRenderService, ViewRenderService>();
