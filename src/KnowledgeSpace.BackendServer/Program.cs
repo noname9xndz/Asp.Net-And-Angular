@@ -28,6 +28,8 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory());
 builder.WebHost.UseIISIntegration();
 
+string KspSpecificOrigins = "KspSpecificOrigins";
+
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -45,12 +47,24 @@ builder.Services.AddIdentityServer(options =>
     options.Events.RaiseSuccessEvents = true;
 }).AddInMemoryApiResources(Config.Apis)
   .AddInMemoryApiScopes(Config.ApiScopes)
-  //.AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
-  .AddInMemoryClients(Config.Clients)
+  .AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
+  //.AddInMemoryClients(Config.Clients)
   .AddInMemoryIdentityResources(Config.Ids)
   .AddAspNetIdentity<User>()
   .AddProfileService<IdentityProfileService>()  //add more data for client
   .AddDeveloperSigningCredential();
+var origins = builder.Configuration.GetSection("AllowOrigins").Value;
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(KspSpecificOrigins,
+    builder =>
+    {
+        builder.WithOrigins(origins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -160,6 +174,8 @@ app.UseHttpsRedirection();
 app.UseSwagger();
 app.UseRouting();
 app.UseAuthorization();
+app.UseCors(KspSpecificOrigins);
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapDefaultControllerRoute();
