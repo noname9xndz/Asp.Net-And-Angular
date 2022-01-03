@@ -11,3 +11,8 @@ if (environment.production) {
 platformBrowserDynamic()
     .bootstrapModule(AppModule)
     .catch((err) => console.error(err));
+
+    /**
+     * generator module : ng g m protected-zone/systems
+     * generator component : ng g c protected-zone/contents/knowledge-bases
+     */
